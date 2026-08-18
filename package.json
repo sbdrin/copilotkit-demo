@@ -3,9 +3,15 @@
   "private": true,
   "workspaces": ["client", "server"],
   "scripts": {
-    "dev": "concurrently -n server,client -c blue,green \"npm run dev -w server\" \"npx wait-on http://localhost:3001/health -t 30000 && npm run dev -w client\"",
+    "dev": "concurrently -n proxy,client -c blue,green \"npm run dev -w server\" \"npx wait-on http://localhost:3001/health -t 30000 && npm run dev -w client\"",
     "build": "npm run build -w client",
     "start": "npm run start -w server"
+  },
+  "overrides": {
+    "@ag-ui/client": "0.0.57",
+    "@ag-ui/core": "0.0.57",
+    "@ag-ui/encoder": "0.0.57",
+    "@ag-ui/proto": "0.0.57"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

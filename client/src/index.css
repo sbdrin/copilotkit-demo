@@ -13,6 +13,14 @@ body {
 
 #root {
   min-height: 100vh;
+  width: 100%;
+}
+
+/* CopilotSidebar 已用 margin-inline-end 预留侧栏宽度；附件菜单 scroll-lock
+   会再加等量 padding-right，主内容区会被挤到约一半宽度。 */
+body[data-scroll-locked] {
+  padding-right: 0 !important;
+  padding-inline-end: 0 !important;
 }
 
 button {

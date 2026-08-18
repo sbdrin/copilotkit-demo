@@ -34,7 +34,7 @@ import {
 } from './components/HtmlPreview'
 import './components/App.css'
 import { parseToolResult } from './utils'
-import { CHAT_ATTACHMENTS } from './attachments'
+import { copilotChatConfig } from './copilot-chat-config'
 
 const TIME_SLOTS: TimeSlot[] = [
   { label: '明天 10:00', iso: '2026-08-19T10:00:00+08:00' },
@@ -678,18 +678,18 @@ export default function App() {
       {chatMode === 'sidebar' ? (
         <CopilotSidebar
           defaultOpen
-          attachments={CHAT_ATTACHMENTS}
+          {...copilotChatConfig}
           labels={{
-            modalHeaderTitle: 'DeepSeek 助手',
+            ...copilotChatConfig.labels,
             welcomeMessageText:
               '你好！支持上传图片和文档附件（点击输入框左侧 + 号），也能生成 HTML 预览、弹出表单。试试上传一张图片并问我里面有什么。'
           }}
         />
       ) : (
         <CopilotPopup
-          attachments={CHAT_ATTACHMENTS}
+          {...copilotChatConfig}
           labels={{
-            modalHeaderTitle: 'DeepSeek 助手',
+            ...copilotChatConfig.labels,
             welcomeMessageText: '你好！点击输入框开始对话。'
           }}
         />

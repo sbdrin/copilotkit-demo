@@ -8,12 +8,11 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.36",
+    "@ag-ui/agno": "^0.0.5",
     "@copilotkit/runtime": "^1.68.1",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "zod": "^3.25.67"
+    "express": "^5.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.18",
