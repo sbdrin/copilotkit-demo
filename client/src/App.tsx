@@ -406,11 +406,8 @@ export default function App() {
         status={status}
         defaultTitle={args?.title}
         defaultHtml={args?.html}
-        onSubmit={(data) => {
-          addHtmlPreview(data.title, data.html)
-          respond?.({ submitted: true, ...data })
-        }}
-        onCancel={() => respond?.({ submitted: false, reason: '用户取消' })}
+        respond={respond}
+        onSync={addHtmlPreview}
       />
     )
   })

@@ -163,12 +163,14 @@ export function SyncedHtmlPreviewCard({
   )
 }
 
+type HitlRespond = (result: Record<string, unknown>) => void
+
 interface HtmlEditorPreviewCardProps {
   status: string
   defaultTitle?: string
   defaultHtml?: string
-  onSubmit: (data: { title: string; html: string }) => void
-  onCancel?: () => void
+  respond?: HitlRespond
+  onSync?: (title: string, html: string) => void
 }
 
 /** HITL：可编辑 HTML + 实时 iframe 预览 */
@@ -176,23 +178,47 @@ export function HtmlEditorPreviewCard({
   status,
   defaultTitle = "我的页面",
   defaultHtml = "<h1>Hello</h1><p>编辑左侧 HTML，右侧实时预览</p>",
-  onSubmit,
-  onCancel,
+  respond,
+  onSync,
 }: HtmlEditorPreviewCardProps) {
   const [title, setTitle] = useState(defaultTitle)
   const [html, setHtml] = useState(defaultHtml)
+  const [error, setError] = useState<string | null>(null)
+
+  const canRespond = status === "executing" && typeof respond === "function"
 
   if (status === "complete") {
     return (
-      <div className="gen-card html-preview-card done">
-        ✅ HTML 已提交：{title}
+      <div className="html-editor-done">
+        <p className="hitl-form-sub">✅ HTML 已提交（已同步到右侧预览区）</p>
+        <HtmlPreviewCard title={title} html={html} height={200} />
       </div>
     )
+  }
+
+  const handleSubmit = () => {
+    const trimmed = html.trim()
+    if (!trimmed) {
+      setError("请填写 HTML 内容后再提交")
+      return
+    }
+    setError(null)
+    onSync?.(title, trimmed)
+    if (!canRespond || !respond) return
+    respond({ submitted: true, title, html: trimmed })
+  }
+
+  const handleCancel = () => {
+    if (!canRespond || !respond) return
+    respond({ submitted: false, reason: "用户取消" })
   }
 
   return (
     <div className="gen-card html-preview-card html-editor-card">
       <h4>✏️ 编辑 HTML 并预览</h4>
+      {!canRespond && (
+        <p className="hitl-form-sub">⏳ 编辑器加载中，稍候即可提交…</p>
+      )}
       <label className="html-editor-title">
         标题
         <input
@@ -206,7 +232,10 @@ export function HtmlEditorPreviewCard({
           HTML 源码
           <textarea
             value={html}
-            onChange={(e) => setHtml(e.target.value)}
+            onChange={(e) => {
+              setHtml(e.target.value)
+              if (error) setError(null)
+            }}
             rows={10}
             spellCheck={false}
           />
@@ -215,19 +244,24 @@ export function HtmlEditorPreviewCard({
           <HtmlPreviewFrame html={html} title={title} height={220} />
         </div>
       </div>
+      {error && <p className="hitl-form-error">{error}</p>}
       <div className="hitl-form-actions">
         <button
           type="button"
           className="btn-primary"
-          onClick={() => onSubmit({ title, html })}
+          disabled={!canRespond}
+          onClick={handleSubmit}
         >
-          提交 HTML
+          {canRespond ? "提交 HTML" : "准备中…"}
         </button>
-        {onCancel && (
-          <button type="button" className="btn-ghost" onClick={onCancel}>
-            取消
-          </button>
-        )}
+        <button
+          type="button"
+          className="btn-ghost"
+          disabled={!canRespond}
+          onClick={handleCancel}
+        >
+          取消
+        </button>
       </div>
     </div>
   )

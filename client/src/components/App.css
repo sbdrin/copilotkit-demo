@@ -466,8 +466,20 @@
   font-size: 0.9rem;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: #4f46e5;
+}
+
+.btn-primary:disabled,
+.btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hitl-form-error {
+  margin: 8px 0 0;
+  color: #dc2626;
+  font-size: 0.85rem;
 }
 
 .btn-ghost {
@@ -546,6 +558,16 @@
   padding: 14px 16px;
   background: #dcfce7;
   border-color: #86efac;
+}
+
+.html-editor-done {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.html-editor-done .hitl-form-sub {
+  margin: 0;
 }
 
 .html-preview-header {
