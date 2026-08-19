@@ -67,8 +67,7 @@ const FEATURES = [
     icon: '💡',
     title: 'Suggestions',
     desc: 'useConfigureSuggestions 快捷建议'
-  },
-  { icon: '🧠', title: 'DeepSeek', desc: 'OpenAI 兼容 API 接入' }
+  }
 ]
 
 export default function App() {
