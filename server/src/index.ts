@@ -105,7 +105,7 @@ const calculate = defineTool({
 const generateHtml = defineTool({
   name: "generateHtml",
   description:
-    "生成 HTML 页面片段用于预览。template 可选：landing（落地页）、dashboard（仪表盘）、card（卡片）",
+    "生成 HTML 页面片段并在聊天中自动预览。template 可选：landing（落地页）、dashboard（仪表盘）、card（卡片）。调用后无需再调用 showHtmlPreview。",
   parameters: z.object({
     template: z
       .enum(["landing", "dashboard", "card"])
@@ -146,9 +146,9 @@ const builtInAgent = new BuiltInAgent({
    - fillContactForm：弹出联系表单（姓名、手机、公司、需求）
    - createTodoWithForm：弹出待办确认表单（比直接 addTodo 更好）
    - scheduleMeeting：弹出会议时间选择器
-   - showHtmlPreview：展示 HTML 预览（iframe）
+   - showHtmlPreview：展示自定义 HTML 预览（仅用于非模板内容，不要与 generateHtml 重复调用）
    - editHtmlPreview：弹出 HTML 编辑器让用户编辑并预览
-3. 调用后端 generateHtml 工具生成 landing/dashboard/card 模板 HTML
+3. 调用后端 generateHtml 工具生成 landing/dashboard/card 模板 HTML（结果会自动预览，禁止再调用 showHtmlPreview）
 4. 调用前端工具 addTodo/toggleTodo/removeTodo（无需表单的快速操作）
 5. 读取用户上下文：待办列表、表单提交记录、HTML 预览记录、用户信息
 当用户说「生成 HTML」「预览页面」「编辑 HTML」时，调用对应 HTML 工具。

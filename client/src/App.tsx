@@ -34,7 +34,7 @@ import {
 } from './components/HtmlPreview'
 import './components/App.css'
 import { parseToolResult } from './utils'
-import { CHAT_ATTACHMENTS } from './attachments'
+import { copilotChatConfig } from './copilot-chat-config'
 
 const TIME_SLOTS: TimeSlot[] = [
   { label: '明天 10:00', iso: '2026-08-19T10:00:00+08:00' },
@@ -112,16 +112,26 @@ export default function App() {
   })
 
   const addHtmlPreview = useCallback((title: string, html: string) => {
-    if (!html?.trim()) return null
-    const item: HtmlPreviewItem = {
-      id: Date.now(),
-      title,
-      html,
-      createdAt: new Date().toLocaleString('zh-CN')
-    }
-    setHtmlPreviews((prev) => [item, ...prev])
-    setActivePreviewId(item.id)
-    return item
+    const trimmed = html?.trim()
+    if (!trimmed) return null
+    let created: HtmlPreviewItem | null = null
+    setHtmlPreviews((prev) => {
+      if (prev.some((p) => p.title === title && p.html === trimmed)) {
+        const existing = prev.find((p) => p.title === title && p.html === trimmed)!
+        created = existing
+        return prev
+      }
+      const item: HtmlPreviewItem = {
+        id: Date.now(),
+        title,
+        html: trimmed,
+        createdAt: new Date().toLocaleString('zh-CN')
+      }
+      created = item
+      return [item, ...prev]
+    })
+    if (created) setActivePreviewId(created.id)
+    return created
   }, [])
 
   const activePreview =
@@ -325,7 +335,7 @@ export default function App() {
   useComponent({
     name: 'showHtmlPreview',
     description:
-      '在聊天中展示 HTML 页面预览（iframe）。用于展示 Agent 生成的 HTML 片段或完整页面。',
+      '在聊天中展示自定义 HTML 页面预览（iframe）。仅用于展示 Agent 自行编写的 HTML，不要与 generateHtml 同时调用（generateHtml 已自带预览）。',
     parameters: z.object({
       title: z.string().describe('预览标题'),
       html: z.string().describe('HTML 内容，可以是片段或完整文档')
@@ -678,18 +688,18 @@ export default function App() {
       {chatMode === 'sidebar' ? (
         <CopilotSidebar
           defaultOpen
-          attachments={CHAT_ATTACHMENTS}
+          {...copilotChatConfig}
           labels={{
-            modalHeaderTitle: 'DeepSeek 助手',
+            ...copilotChatConfig.labels,
             welcomeMessageText:
               '你好！支持上传图片和文档附件（点击输入框左侧 + 号），也能生成 HTML 预览、弹出表单。试试上传一张图片并问我里面有什么。'
           }}
         />
       ) : (
         <CopilotPopup
-          attachments={CHAT_ATTACHMENTS}
+          {...copilotChatConfig}
           labels={{
-            modalHeaderTitle: 'DeepSeek 助手',
+            ...copilotChatConfig.labels,
             welcomeMessageText: '你好！点击输入框开始对话。'
           }}
         />

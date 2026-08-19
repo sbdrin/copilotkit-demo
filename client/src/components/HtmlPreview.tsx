@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 
 /** 包装片段为完整 HTML 文档 */
 export function wrapHtmlDocument(html?: string | null, title = "Preview") {
@@ -104,6 +104,29 @@ export function HtmlPreviewCard({
   )
 }
 
+/** 跨组件实例去重，避免 generateHtml + showHtmlPreview 重复渲染 */
+const RECENT_HTML_MS = 60_000
+const recentHtmlSlots = new Map<string, { at: number; ownerId: string }>()
+
+function getHtmlPreviewKey(title: string, html: string) {
+  return `${title}::${html.trim()}`
+}
+
+/** 抢占预览槽位；同一 ownerId（含 Strict Mode 重挂载）可重复抢占 */
+function claimHtmlPreviewSlot(key: string, ownerId: string) {
+  const now = Date.now()
+  const slot = recentHtmlSlots.get(key)
+  if (
+    slot != null &&
+    slot.ownerId !== ownerId &&
+    now - slot.at < RECENT_HTML_MS
+  ) {
+    return false
+  }
+  recentHtmlSlots.set(key, { at: now, ownerId })
+  return true
+}
+
 /** 同步到主页面预览区（避免 render 内直接 setState） */
 export function SyncedHtmlPreviewCard({
   title,
@@ -113,14 +136,31 @@ export function SyncedHtmlPreviewCard({
 }: HtmlPreviewCardProps & {
   onSync: (title: string, html: string) => void
 }) {
+  const ownerId = useId()
+  const resolvedTitle = title ?? "HTML 预览"
+  const trimmedHtml = (html ?? "").trim()
   const synced = useRef(false)
-  useEffect(() => {
-    if (synced.current || !(html ?? "").trim()) return
-    synced.current = true
-    onSync(title ?? "HTML 预览", html!)
-  }, [title, html, onSync])
 
-  return <HtmlPreviewCard title={title} html={html} height={height} />
+  const shouldRender = useMemo(() => {
+    if (!trimmedHtml) return true
+    return claimHtmlPreviewSlot(
+      getHtmlPreviewKey(resolvedTitle, trimmedHtml),
+      ownerId
+    )
+  }, [resolvedTitle, trimmedHtml, ownerId])
+
+  useEffect(() => {
+    if (!trimmedHtml || !shouldRender) return
+    if (synced.current) return
+    synced.current = true
+    onSync(resolvedTitle, trimmedHtml)
+  }, [resolvedTitle, trimmedHtml, onSync, shouldRender])
+
+  if (!shouldRender) return null
+
+  return (
+    <HtmlPreviewCard title={resolvedTitle} html={trimmedHtml} height={height} />
+  )
 }
 
 interface HtmlEditorPreviewCardProps {
