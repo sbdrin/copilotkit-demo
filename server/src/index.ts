@@ -94,6 +94,93 @@ function parseAgnoError(text: string, status: number): string {
   return text.trim() || `Agno 请求失败 (HTTP ${status})`
 }
 
+function formatStreamError(err: unknown): string {
+  if (err instanceof Error) {
+    const cause =
+      err.cause instanceof Error
+        ? err.cause.message
+        : typeof err.cause === "string"
+          ? err.cause
+          : undefined
+    if (cause && cause !== err.message) return `${err.message} (${cause})`
+    return err.message
+  }
+  return "Agno SSE 流意外中断"
+}
+
+function logRawError(label: string, err: unknown): void {
+  console.error(label)
+  if (err instanceof Error) {
+    console.error(err)
+    if (err.cause !== undefined) {
+      console.error(`${label} [cause]`, err.cause)
+    }
+    return
+  }
+  console.error(err)
+}
+
+function isAgnoStreamAbortError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false
+  if (err.message === "terminated") return true
+  const cause = err.cause as { code?: string } | undefined
+  return cause?.code === "UND_ERR_SOCKET"
+}
+
+function sseEvent(event: Record<string, unknown>): Uint8Array {
+  return new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`)
+}
+
+/** 代理 Agno SSE：流中断时补发 RUN_ERROR，避免 undici 异常打崩进程 */
+function wrapSseResponse(upstream: Response, meta: AgnoRunMeta): Response {
+  const upstreamBody = upstream.body
+  if (!upstreamBody) {
+    return agnoErrorResponse("Agno 返回空 SSE 响应", "AGNO_EMPTY_SSE", meta)
+  }
+
+  const reader = upstreamBody.getReader()
+  let runErrorEmitted = false
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) {
+            controller.close()
+            return
+          }
+          if (value) controller.enqueue(value)
+        }
+      } catch (err) {
+        logRawError("[proxy] Agno SSE 流中断（原始错误）", err)
+        const message = formatStreamError(err)
+        if (!runErrorEmitted) {
+          runErrorEmitted = true
+          controller.enqueue(
+            sseEvent({
+              type: "RUN_ERROR",
+              message,
+              code: "AGNO_STREAM_INTERRUPTED",
+            }),
+          )
+        }
+        controller.close()
+      } finally {
+        reader.releaseLock()
+      }
+    },
+    cancel() {
+      reader.cancel().catch(() => {})
+    },
+  })
+
+  return new Response(stream, {
+    status: upstream.status,
+    headers: upstream.headers,
+  })
+}
+
 /** Agno 后端必填字段补全 + 注入 agent_code（参考 kdl-agent copilotkit route） */
 const customFetch: typeof fetch = async (input, init) => {
   let runMeta = readRunMeta(
@@ -128,6 +215,7 @@ const customFetch: typeof fetch = async (input, init) => {
   try {
     res = await fetch(input, init)
   } catch (err) {
+    logRawError("[proxy] Agno 连接失败（原始错误）", err)
     const message =
       err instanceof Error ? err.message : "无法连接 Agno AG-UI 端点"
     console.error("[proxy] Agno 连接失败:", message)
@@ -144,8 +232,19 @@ const customFetch: typeof fetch = async (input, init) => {
     return agnoErrorResponse(message, `AGNO_HTTP_${res.status}`, runMeta)
   }
 
-  return res
+  return wrapSseResponse(res, runMeta)
 }
+
+process.on("unhandledRejection", (reason) => {
+  if (isAgnoStreamAbortError(reason)) {
+    logRawError(
+      "[proxy] Agno SSE 流中断（兜底捕获，原始错误，进程继续运行）",
+      reason,
+    )
+    return
+  }
+  logRawError("[proxy] 未处理的 Promise 拒绝（原始错误）", reason)
+})
 
 const runtime = new CopilotRuntime({
   agents: {
