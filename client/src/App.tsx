@@ -262,51 +262,51 @@ export default function App() {
     [todos]
   )
 
-  // ── 生成式 UI：useRenderTool 渲染后端工具结果 ─────────────────
-  useRenderTool({
-    name: 'getWeather',
-    parameters: z.object({ city: z.string() }),
-    render: ({ parameters, result, status }) => {
-      if (status !== 'complete' || !result) {
-        return (
-          <div className="gen-card loading-card">
-            ⏳ 正在查询 {parameters.city ?? '...'} 的天气…
-          </div>
-        )
-      }
-      const data = parseToolResult<{
-        city: string
-        temperature: number
-        unit?: string
-        condition: string
-        humidity?: string
-      }>(result)
-      if (typeof data === 'string') {
-        return <div className="gen-card">{data}</div>
-      }
-      return <WeatherCard {...data} />
-    }
-  })
+  // // ── 生成式 UI：useRenderTool 渲染后端工具结果 ─────────────────
+  // useRenderTool({
+  //   name: 'getWeather',
+  //   parameters: z.object({ city: z.string() }),
+  //   render: ({ parameters, result, status }) => {
+  //     if (status !== 'complete' || !result) {
+  //       return (
+  //         <div className="gen-card loading-card">
+  //           ⏳ 正在查询 {parameters.city ?? '...'} 的天气…
+  //         </div>
+  //       )
+  //     }
+  //     const data = parseToolResult<{
+  //       city: string
+  //       temperature: number
+  //       unit?: string
+  //       condition: string
+  //       humidity?: string
+  //     }>(result)
+  //     if (typeof data === 'string') {
+  //       return <div className="gen-card">{data}</div>
+  //     }
+  //     return <WeatherCard {...data} />
+  //   }
+  // })
 
-  useRenderTool({
-    name: 'searchKnowledge',
-    parameters: z.object({ query: z.string() }),
-    render: ({ parameters, result, status }) => {
-      const parsed = result ? parseToolResult<{ result: string }>(result) : null
-      const text = typeof parsed === 'string' ? parsed : parsed?.result
-      return (
-        <div className="gen-card knowledge-card">
-          <h4>📚 知识库搜索</h4>
-          <p>查询：{parameters.query}</p>
-          {status === 'complete' && text ? (
-            <p className="knowledge-result">{text}</p>
-          ) : (
-            <p>搜索中…</p>
-          )}
-        </div>
-      )
-    }
-  })
+  // useRenderTool({
+  //   name: 'searchKnowledge',
+  //   parameters: z.object({ query: z.string() }),
+  //   render: ({ parameters, result, status }) => {
+  //     const parsed = result ? parseToolResult<{ result: string }>(result) : null
+  //     const text = typeof parsed === 'string' ? parsed : parsed?.result
+  //     return (
+  //       <div className="gen-card knowledge-card">
+  //         <h4>📚 知识库搜索</h4>
+  //         <p>查询：{parameters.query}</p>
+  //         {status === 'complete' && text ? (
+  //           <p className="knowledge-result">{text}</p>
+  //         ) : (
+  //           <p>搜索中…</p>
+  //         )}
+  //       </div>
+  //     )
+  //   }
+  // })
 
   // ── 默认工具渲染器（useDefaultRenderTool）──────────────────────
   useDefaultRenderTool({
@@ -345,41 +345,41 @@ export default function App() {
     }
   })
 
-  // ── 后端 generateHtml 工具结果渲染 ────────────────────────────
-  useRenderTool({
-    name: 'generateHtml',
-    parameters: z.object({
-      template: z.string(),
-      title: z.string().optional()
-    }),
-    render: ({ parameters, result, status }) => {
-      if (status !== 'complete' || !result) {
-        return (
-          <div className="gen-card loading-card">
-            ⏳ 正在生成 HTML（{parameters.template}）…
-          </div>
-        )
-      }
-      const data = parseToolResult<{
-        title: string
-        html: string
-      }>(result)
-      if (typeof data === 'string' || !data?.html) {
-        return (
-          <div className="gen-card">
-            {typeof data === 'string' ? data : 'HTML 生成失败'}
-          </div>
-        )
-      }
-      return (
-        <SyncedHtmlPreviewCard
-          title={data.title}
-          html={data.html}
-          onSync={addHtmlPreview}
-        />
-      )
-    }
-  })
+  // // ── 后端 generateHtml 工具结果渲染 ────────────────────────────
+  // useRenderTool({
+  //   name: 'generateHtml',
+  //   parameters: z.object({
+  //     template: z.string(),
+  //     title: z.string().optional()
+  //   }),
+  //   render: ({ parameters, result, status }) => {
+  //     if (status !== 'complete' || !result) {
+  //       return (
+  //         <div className="gen-card loading-card">
+  //           ⏳ 正在生成 HTML（{parameters.template}）…
+  //         </div>
+  //       )
+  //     }
+  //     const data = parseToolResult<{
+  //       title: string
+  //       html: string
+  //     }>(result)
+  //     if (typeof data === 'string' || !data?.html) {
+  //       return (
+  //         <div className="gen-card">
+  //           {typeof data === 'string' ? data : 'HTML 生成失败'}
+  //         </div>
+  //       )
+  //     }
+  //     return (
+  //       <SyncedHtmlPreviewCard
+  //         title={data.title}
+  //         html={data.html}
+  //         onSync={addHtmlPreview}
+  //       />
+  //     )
+  //   }
+  // })
 
   // ── 可交互 HTML 编辑器（HITL）────────────────────────────────
   useHumanInTheLoop({
