@@ -10,6 +10,7 @@ function DirectAddFileButton({
   onAddFile,
   disabled,
   className,
+  toolsMenu: _toolsMenu,
   ...rest
 }: AddButtonProps) {
   return (
