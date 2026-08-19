@@ -117,7 +117,9 @@ export default function App() {
     let created: HtmlPreviewItem | null = null
     setHtmlPreviews((prev) => {
       if (prev.some((p) => p.title === title && p.html === trimmed)) {
-        const existing = prev.find((p) => p.title === title && p.html === trimmed)!
+        const existing = prev.find(
+          (p) => p.title === title && p.html === trimmed
+        )!
         created = existing
         return prev
       }
@@ -168,7 +170,14 @@ export default function App() {
   // ── 快捷建议（Suggestions）────────────────────────────────────
   useConfigureSuggestions({
     suggestions: [
-      { title: 'HTML 预览', message: '生成一个产品介绍的 HTML 页面并预览' },
+      {
+        title: '随机HTML',
+        message: '随便生成一个创意 HTML 页面示例并预览，不要用固定模板'
+      },
+      {
+        title: '产品介绍',
+        message: '生成一个产品介绍的 HTML 页面并预览'
+      },
       { title: '编辑 HTML', message: '弹出 HTML 编辑器，让我自己写代码并预览' },
       {
         title: '联系销售',
@@ -335,10 +344,10 @@ export default function App() {
   useComponent({
     name: 'showHtmlPreview',
     description:
-      '在聊天中展示自定义 HTML 页面预览（iframe）。仅用于展示 Agent 自行编写的 HTML，不要与 generateHtml 同时调用（generateHtml 已自带预览）。',
+      '展示你自行编写的 HTML 预览（iframe）。这是「生成 HTML / HTML 示例 / 随机创意页面」的默认路径：先自己写 html 字符串，再调用本工具。禁止用于产品介绍模板场景（那种才用 generateHtml）；也不要与 generateHtml 同时调用。',
     parameters: z.object({
       title: z.string().describe('预览标题'),
-      html: z.string().describe('HTML 内容，可以是片段或完整文档')
+      html: z.string().describe('你自行创作的 HTML 内容（片段或完整文档）')
     }),
     render: ({ title, html }) => {
       if (!(html ?? '').trim()) {
@@ -633,7 +642,7 @@ export default function App() {
             />
           ) : (
             <p className="empty-hint">
-              试试说「生成产品介绍 HTML」或「弹出 HTML 编辑器」
+              试试说「随便生成一个 HTML 示例」或「生成产品介绍 HTML」
             </p>
           )}
 
