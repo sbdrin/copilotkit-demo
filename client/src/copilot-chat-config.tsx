@@ -8,6 +8,7 @@ type AddButtonProps = ComponentProps<typeof CopilotChatInput.AddMenuButton>
 /** 点 + 直接打开系统文件选择框，不走下拉菜单 */
 function DirectAddFileButton({
   onAddFile,
+  toolsMenu: _toolsMenu,
   disabled,
   className,
   ...rest
@@ -44,9 +45,9 @@ export const copilotChatConfig: Pick<
   attachments: CHAT_ATTACHMENTS,
   labels: {
     modalHeaderTitle: 'DeepSeek 助手',
-    chatInputToolbarAddButtonLabel: '添加附件',
+    chatInputToolbarAddButtonLabel: '添加附件'
   },
   input: {
-    addMenuButton: DirectAddFileButton,
-  },
+    addMenuButton: DirectAddFileButton
+  }
 }

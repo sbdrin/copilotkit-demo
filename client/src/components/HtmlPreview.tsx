@@ -1,8 +1,8 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 /** 包装片段为完整 HTML 文档 */
-export function wrapHtmlDocument(html?: string | null, title = "Preview") {
-  const trimmed = (html ?? "").trim()
+export function wrapHtmlDocument(html?: string | null, title = 'Preview') {
+  const trimmed = (html ?? '').trim()
   if (!trimmed) {
     return `<!DOCTYPE html><html><body><p style="color:#94a3b8;padding:16px">暂无 HTML 内容</p></body></html>`
   }
@@ -29,17 +29,18 @@ interface HtmlPreviewFrameProps {
   allowScripts?: boolean
 }
 
-/** iframe 沙箱预览 */
+/** iframe 沙箱预览（默认允许脚本；不加 allow-same-origin，避免访问父页） */
 export function HtmlPreviewFrame({
   html,
-  title = "Preview",
+  title = 'Preview',
   height = 280,
-  allowScripts = false,
+  allowScripts = true
 }: HtmlPreviewFrameProps) {
   const doc = wrapHtmlDocument(html, title)
+  // 无 allow-same-origin：脚本可跑，但无法读父文档 / cookie
   const sandbox = allowScripts
-    ? "allow-scripts allow-popups"
-    : "allow-popups"
+    ? 'allow-scripts allow-popups allow-forms'
+    : 'allow-popups allow-forms'
 
   return (
     <iframe
@@ -57,41 +58,69 @@ interface HtmlPreviewCardProps {
   html?: string | null
   allowScripts?: boolean
   height?: number
+  /** false：生成中强制源码；变为 true 后自动切到预览 */
+  complete?: boolean
 }
 
 /** 生成式 UI：HTML 预览卡片（iframe） */
 export function HtmlPreviewCard({
-  title = "HTML 预览",
-  html = "",
-  allowScripts = false,
+  title = 'HTML 预览',
+  html = '',
+  allowScripts = true,
   height = 280,
+  complete = true
 }: HtmlPreviewCardProps) {
-  const [view, setView] = useState<"preview" | "code">("preview")
+  const [view, setView] = useState<'preview' | 'code'>(
+    complete ? 'preview' : 'code'
+  )
+  const wasComplete = useRef(complete)
+
+  useEffect(() => {
+    if (!complete) {
+      setView('code')
+    } else if (!wasComplete.current) {
+      setView('preview')
+    }
+    wasComplete.current = complete
+  }, [complete])
+
+  const codeRef = useRef<HTMLPreElement>(null)
+  useEffect(() => {
+    if (view !== 'code' || complete) return
+    const el = codeRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [html, view, complete])
 
   return (
     <div className="gen-card html-preview-card">
       <div className="html-preview-header">
-        <h4>🌐 {title}</h4>
+        <h4>
+          🌐 {title}
+          {!complete ? ' · 生成中' : ''}
+        </h4>
         <div className="html-preview-tabs">
           <button
             type="button"
-            className={view === "preview" ? "active" : ""}
-            onClick={() => setView("preview")}
+            className={view === 'preview' ? 'active' : ''}
+            disabled={!complete}
+            onClick={() => setView('preview')}
           >
             预览
           </button>
           <button
             type="button"
-            className={view === "code" ? "active" : ""}
-            onClick={() => setView("code")}
+            className={view === 'code' ? 'active' : ''}
+            onClick={() => setView('code')}
           >
             源码
           </button>
         </div>
       </div>
 
-      {view === "code" ? (
-        <pre className="html-preview-code">{html}</pre>
+      {view === 'code' ? (
+        <pre ref={codeRef} className="html-preview-code">
+          {html || '⏳ 正在生成 HTML…'}
+        </pre>
       ) : (
         <HtmlPreviewFrame
           html={html}
@@ -133,33 +162,40 @@ export function SyncedHtmlPreviewCard({
   html,
   onSync,
   height,
+  complete = true
 }: HtmlPreviewCardProps & {
   onSync: (title: string, html: string) => void
 }) {
   const ownerId = useId()
-  const resolvedTitle = title ?? "HTML 预览"
-  const trimmedHtml = (html ?? "").trim()
+  const resolvedTitle = title ?? 'HTML 预览'
+  const trimmedHtml = (html ?? '').trim()
   const synced = useRef(false)
 
   const shouldRender = useMemo(() => {
-    if (!trimmedHtml) return true
+    // 生成中始终展示源码流，不参与去重抢占
+    if (!complete || !trimmedHtml) return true
     return claimHtmlPreviewSlot(
       getHtmlPreviewKey(resolvedTitle, trimmedHtml),
       ownerId
     )
-  }, [resolvedTitle, trimmedHtml, ownerId])
+  }, [resolvedTitle, trimmedHtml, ownerId, complete])
 
   useEffect(() => {
-    if (!trimmedHtml || !shouldRender) return
+    if (!complete || !trimmedHtml || !shouldRender) return
     if (synced.current) return
     synced.current = true
     onSync(resolvedTitle, trimmedHtml)
-  }, [resolvedTitle, trimmedHtml, onSync, shouldRender])
+  }, [resolvedTitle, trimmedHtml, onSync, shouldRender, complete])
 
   if (!shouldRender) return null
 
   return (
-    <HtmlPreviewCard title={resolvedTitle} html={trimmedHtml} height={height} />
+    <HtmlPreviewCard
+      title={resolvedTitle}
+      html={trimmedHtml}
+      height={height}
+      complete={complete}
+    />
   )
 }
 
@@ -176,18 +212,18 @@ interface HtmlEditorPreviewCardProps {
 /** HITL：可编辑 HTML + 实时 iframe 预览 */
 export function HtmlEditorPreviewCard({
   status,
-  defaultTitle = "我的页面",
-  defaultHtml = "<h1>Hello</h1><p>编辑左侧 HTML，右侧实时预览</p>",
+  defaultTitle = '我的页面',
+  defaultHtml = '<h1>Hello</h1><p>编辑左侧 HTML，右侧实时预览</p>',
   respond,
-  onSync,
+  onSync
 }: HtmlEditorPreviewCardProps) {
   const [title, setTitle] = useState(defaultTitle)
   const [html, setHtml] = useState(defaultHtml)
   const [error, setError] = useState<string | null>(null)
 
-  const canRespond = status === "executing" && typeof respond === "function"
+  const canRespond = status === 'executing' && typeof respond === 'function'
 
-  if (status === "complete") {
+  if (status === 'complete') {
     return (
       <div className="html-editor-done">
         <p className="hitl-form-sub">✅ HTML 已提交（已同步到右侧预览区）</p>
@@ -199,7 +235,7 @@ export function HtmlEditorPreviewCard({
   const handleSubmit = () => {
     const trimmed = html.trim()
     if (!trimmed) {
-      setError("请填写 HTML 内容后再提交")
+      setError('请填写 HTML 内容后再提交')
       return
     }
     setError(null)
@@ -210,7 +246,7 @@ export function HtmlEditorPreviewCard({
 
   const handleCancel = () => {
     if (!canRespond || !respond) return
-    respond({ submitted: false, reason: "用户取消" })
+    respond({ submitted: false, reason: '用户取消' })
   }
 
   return (
@@ -252,7 +288,7 @@ export function HtmlEditorPreviewCard({
           disabled={!canRespond}
           onClick={handleSubmit}
         >
-          {canRespond ? "提交 HTML" : "准备中…"}
+          {canRespond ? '提交 HTML' : '准备中…'}
         </button>
         <button
           type="button"

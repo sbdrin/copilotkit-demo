@@ -340,8 +340,9 @@ export default function App() {
     )
   })
 
-  // ── 生成式 UI：HTML 预览（useComponent）──────────────────────
-  useComponent({
+  // ── 生成式 UI：HTML 预览（用 useFrontendTool 才能拿到 status）──
+  // useComponent 不会把 status 传给 render，流式生成时无法区分完成态
+  useFrontendTool({
     name: 'showHtmlPreview',
     description:
       '展示你自行编写的 HTML 预览（iframe）。这是「生成 HTML / HTML 示例 / 随机创意页面」的默认路径：先自己写 html 字符串，再调用本工具。禁止用于产品介绍模板场景（那种才用 generateHtml）；也不要与 generateHtml 同时调用。',
@@ -349,16 +350,26 @@ export default function App() {
       title: z.string().describe('预览标题'),
       html: z.string().describe('你自行创作的 HTML 内容（片段或完整文档）')
     }),
-    render: ({ title, html }) => {
-      if (!(html ?? '').trim()) {
+    handler: async () => '已展示 HTML 预览',
+    render: ({ args, status }) => {
+      const title = (args?.title as string | undefined) ?? 'HTML 预览'
+      const html = (args?.html as string | undefined) ?? ''
+      const isComplete = status === 'complete'
+      if (!html.trim() && !isComplete) {
         return (
-          <div className="gen-card loading-card">⏳ 正在准备 HTML 预览…</div>
+          <SyncedHtmlPreviewCard
+            title={title}
+            html=""
+            complete={false}
+            onSync={addHtmlPreview}
+          />
         )
       }
       return (
         <SyncedHtmlPreviewCard
-          title={title ?? 'HTML 预览'}
+          title={title}
           html={html}
+          complete={isComplete}
           onSync={addHtmlPreview}
         />
       )
@@ -373,11 +384,15 @@ export default function App() {
       title: z.string().optional()
     }),
     render: ({ parameters, result, status }) => {
-      if (status !== 'complete' || !result) {
+      const isComplete = status === 'complete'
+      if (!isComplete || !result) {
         return (
-          <div className="gen-card loading-card">
-            ⏳ 正在生成 HTML（{parameters.template}）…
-          </div>
+          <SyncedHtmlPreviewCard
+            title={parameters.title ?? `CopilotKit ${parameters.template} 预览`}
+            html=""
+            complete={false}
+            onSync={addHtmlPreview}
+          />
         )
       }
       const data = parseToolResult<{
@@ -395,6 +410,7 @@ export default function App() {
         <SyncedHtmlPreviewCard
           title={data.title}
           html={data.html}
+          complete
           onSync={addHtmlPreview}
         />
       )

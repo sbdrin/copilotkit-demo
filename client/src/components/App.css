@@ -606,6 +606,11 @@
   border-color: #6366f1;
 }
 
+.html-preview-tabs button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .tab-divider {
   width: 1px;
   height: 16px;
