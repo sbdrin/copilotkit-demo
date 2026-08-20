@@ -6,7 +6,7 @@ export interface UserInfo {
 
 export interface FormSubmission {
   id: number
-  type: "feedback" | "contact"
+  type: "feedback" | "contact" | "operator"
   title: string
   summary: string
   data: Record<string, unknown>

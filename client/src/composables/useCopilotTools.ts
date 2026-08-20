@@ -8,7 +8,7 @@ import {
 import { CopilotKitCoreRuntimeConnectionStatus } from "@copilotkit/core"
 import { useHumanInTheLoop } from "@copilotkit/vue/v2"
 import { z } from "zod"
-import ContactFormCard from "../components/forms/ContactFormCard.vue"
+import OperatorFormCard from "../components/forms/OperatorFormCard.vue"
 import type { useAppState } from "./useAppState"
 
 type AppState = ReturnType<typeof useAppState>
@@ -36,8 +36,8 @@ export function useCopilotTools(state: AppState) {
         message: "生成最简HTML示例，不要太丑",
       },
       {
-        title: "联系销售",
-        message: "我想联系销售了解 CopilotKit 企业版，请让我填表",
+        title: "操作员登记",
+        message: "我想进行无人机操作员登记，请让我填表",
       }
     ],
     available: "always",
@@ -67,14 +67,24 @@ export function useCopilotTools(state: AppState) {
   )
 
   useHumanInTheLoop({
-    name: "fillContactForm",
+    name: "fillOperatorForm",
     description:
-      "弹出联系信息表单（姓名、手机、公司、需求）。用于销售咨询、商务合作等场景。",
+      "弹出无人机操作员登记表单（姓名、证件类型代码、证件号码、联系电话、常住地址、民用无人机执照编号）。用于操作员登记场景。",
     parameters: z.object({
       name: z.string().optional().describe("预填姓名"),
-      message: z.string().optional().describe("预填需求说明"),
+      identifyTypeCode: z
+        .string()
+        .optional()
+        .describe("预填证件类型代码，如 1-居民身份证"),
+      identifyNumber: z.string().optional().describe("预填证件号码"),
+      contactPhone: z.string().optional().describe("预填联系电话"),
+      address: z.string().optional().describe("预填常住地址"),
+      civilUavLicenseNo: z
+        .string()
+        .optional()
+        .describe("预填民用无人机执照编号"),
     }),
-    render: (props: any) => h(ContactFormCard, props),
+    render: (props: any) => h(OperatorFormCard, props),
   })
 
 
