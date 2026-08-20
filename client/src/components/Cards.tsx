@@ -147,6 +147,12 @@ interface DefaultToolCardProps {
   status: string
 }
 
+const TOOL_STATUS_LABEL: Record<string, string> = {
+  inProgress: '调用中…',
+  executing: '执行中…',
+  complete: '已完成'
+}
+
 /** 默认工具渲染器：兜底展示未专门注册的工具调用 */
 export function DefaultToolCard({
   toolName,
@@ -154,21 +160,30 @@ export function DefaultToolCard({
   result,
   status,
 }: DefaultToolCardProps) {
+  const statusLabel =
+    TOOL_STATUS_LABEL[status] ??
+    (status === 'complete' ? '已完成' : status)
+  const isDone = status === 'complete'
+
   return (
-    <div className="gen-card default-tool-card">
-      <h4>🔧 {toolName}</h4>
-      <p className="tool-status">状态：{status}</p>
+    <details className="gen-card default-tool-card" open={!isDone}>
+      <summary className="tool-call-summary">
+        <span className="tool-call-name">🔧 {toolName}</span>
+        <span className={`tool-status-badge ${isDone ? 'done' : 'running'}`}>
+          {statusLabel}
+        </span>
+      </summary>
       {Object.keys(args).length > 0 && (
         <pre className="tool-pre">{JSON.stringify(args, null, 2)}</pre>
       )}
       {result != null && (
         <pre className="tool-pre tool-result">
-          {typeof result === "string"
+          {typeof result === 'string'
             ? result
             : JSON.stringify(result, null, 2)}
         </pre>
       )}
-    </div>
+    </details>
   )
 }
 

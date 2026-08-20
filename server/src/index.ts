@@ -3,7 +3,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import express from "express"
 import cors from "cors"
-import { createOpenAI } from "@ai-sdk/openai"
+import { createDeepSeek } from "@ai-sdk/deepseek"
 import {
   BuiltInAgent,
   CopilotRuntime,
@@ -32,7 +32,8 @@ if (!apiKey) {
   process.exit(1)
 }
 
-const llm = createOpenAI({
+// DeepSeek 兼容端点：用 @ai-sdk/deepseek 才能正确解析 reasoning_content 流
+const llm = createDeepSeek({
   apiKey,
   baseURL: baseURL.endsWith("/v1") ? baseURL : `${baseURL}/v1`,
 })
@@ -76,7 +77,7 @@ const searchKnowledge = defineTool({
       context: "useAgentContext 将应用状态共享给 Agent（v2 版 useCopilotReadable）",
       hitl: "useHumanInTheLoop 暂停 Agent 等待用户确认或选择",
       generative: "useComponent / useRenderTool 实现生成式 UI",
-      deepseek: "通过 createOpenAI + baseURL 接入 DeepSeek 等 OpenAI 兼容 API",
+      deepseek: "通过 createDeepSeek + baseURL 接入 DeepSeek，支持思考链与工具调用",
     }
     const key = Object.keys(docs).find((k) => query.toLowerCase().includes(k))
     return {
@@ -138,6 +139,12 @@ const builtInAgent = new BuiltInAgent({
   model: llm.chat(modelName),
   tools: [getWeather, searchKnowledge, calculate, generateHtml],
   maxSteps: 5,
+  // 启用思考链，前端 CopilotChatReasoningMessage 会自动展示并在结束后折叠
+  providerOptions: {
+    deepseek: {
+      thinking: { type: "enabled" },
+    },
+  },
   prompt: `你是 CopilotKit 全功能演示助手。
 你可以：
 1. 调用后端工具：查天气、搜知识库、计算

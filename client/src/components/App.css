@@ -377,6 +377,44 @@
 
 .default-tool-card {
   background: #f1f5f9;
+  padding: 10px 12px;
+}
+
+.tool-call-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.tool-call-summary::-webkit-details-marker {
+  display: none;
+}
+
+.tool-call-name {
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.tool-status-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.tool-status-badge.running {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.tool-status-badge.done {
+  background: #e2e8f0;
+  color: #64748b;
 }
 
 .tool-status {
@@ -386,7 +424,7 @@
 }
 
 .tool-pre {
-  margin: 4px 0 0;
+  margin: 8px 0 0;
   padding: 8px;
   background: #fff;
   border-radius: 6px;
@@ -396,6 +434,35 @@
 
 .tool-result {
   border-left: 3px solid #6366f1;
+}
+
+/* ── 思考过程（弱化）────────────────────────────────────────── */
+.reasoning-muted {
+  opacity: 0.72;
+  margin: 4px 0 6px !important;
+}
+
+.reasoning-muted__header {
+  font-size: 0.8rem !important;
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+}
+
+.reasoning-muted__header:hover {
+  color: #64748b !important;
+}
+
+.reasoning-muted__content {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  border-left: 2px solid #e2e8f0;
+  padding-left: 10px;
+  margin-left: 2px;
+}
+
+.reasoning-muted__content .cpk\\:text-muted-foreground,
+.reasoning-muted__content [class*='text-muted'] {
+  color: #94a3b8 !important;
 }
 
 /* ── 可交互表单（HITL Generative UI）────────────────────────── */

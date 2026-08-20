@@ -68,6 +68,12 @@ const FEATURES = [
     title: 'Suggestions',
     desc: 'useConfigureSuggestions 快捷建议'
   },
+  {
+    icon: '💭',
+    title: 'Thinking',
+    desc: '思考过程弱化展示，结束后自动折叠'
+  },
+  { icon: '🔧', title: 'Tool Calls', desc: '对话内展示工具调用与结果' },
   { icon: '🧠', title: 'DeepSeek', desc: 'OpenAI 兼容 API 接入' }
 ]
 
@@ -114,12 +120,12 @@ export default function App() {
   const addHtmlPreview = useCallback((title: string, html: string) => {
     const trimmed = html?.trim()
     if (!trimmed) return null
-    let created: HtmlPreviewItem | null = null
+    let created = null as HtmlPreviewItem | null
     setHtmlPreviews((prev) => {
-      if (prev.some((p) => p.title === title && p.html === trimmed)) {
-        const existing = prev.find(
-          (p) => p.title === title && p.html === trimmed
-        )!
+      const existing = prev.find(
+        (p) => p.title === title && p.html === trimmed
+      )
+      if (existing) {
         created = existing
         return prev
       }

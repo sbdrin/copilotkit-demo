@@ -1,7 +1,11 @@
-import { CopilotChatInput } from '@copilotkit/react-core/v2'
+import {
+  CopilotChatInput,
+  CopilotChatReasoningMessage
+} from '@copilotkit/react-core/v2'
 import type { CopilotChatProps } from '@copilotkit/react-core/v2'
 import type { ComponentProps } from 'react'
 import { CHAT_ATTACHMENTS } from './attachments'
+import { ReasoningMessage } from './components/ReasoningMessage'
 
 type AddButtonProps = ComponentProps<typeof CopilotChatInput.AddMenuButton>
 
@@ -40,7 +44,7 @@ function DirectAddFileButton({
 
 export const copilotChatConfig: Pick<
   CopilotChatProps,
-  'attachments' | 'labels' | 'input'
+  'attachments' | 'labels' | 'input' | 'messageView'
 > = {
   attachments: CHAT_ATTACHMENTS,
   labels: {
@@ -49,5 +53,9 @@ export const copilotChatConfig: Pick<
   },
   input: {
     addMenuButton: DirectAddFileButton
+  },
+  messageView: {
+    reasoningMessage:
+      ReasoningMessage as unknown as typeof CopilotChatReasoningMessage
   }
 }
