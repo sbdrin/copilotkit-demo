@@ -39,3 +39,14 @@ export const INITIAL_USER: UserInfo = {
   role: "开发者",
   theme: "light",
 }
+
+export interface CopilotDemoContext {
+  addSubmission: (
+    type: FormSubmission["type"],
+    title: string,
+    summary: string,
+    data: Record<string, unknown>,
+  ) => void
+  addTodo: (todo: Todo) => void
+  addHtmlPreview: (title: string, html: string) => HtmlPreviewItem | null
+}
