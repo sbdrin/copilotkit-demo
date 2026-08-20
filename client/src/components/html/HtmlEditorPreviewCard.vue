@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { computed, inject, ref } from "vue"
+import { computed, ref } from "vue"
 import HtmlPreviewCard from "./HtmlPreviewCard.vue"
 import HtmlPreviewFrame from "./HtmlPreviewFrame.vue"
-import type { CopilotDemoContext } from "../../types"
 
 const props = defineProps<{
   status: string
   args?: { title?: string; html?: string }
   respond?: (result: unknown) => Promise<void>
 }>()
-
-const demo = inject<CopilotDemoContext>("copilotDemo")
 
 const title = ref(props.args?.title ?? "我的页面")
 const html = ref(
@@ -29,7 +26,6 @@ function handleSubmit() {
     return
   }
   error.value = null
-  demo?.addHtmlPreview(title.value, trimmed)
   if (!canRespond.value || !props.respond) return
   props.respond({ submitted: true, title: title.value, html: trimmed })
 }
@@ -42,7 +38,7 @@ function handleCancel() {
 
 <template>
   <div v-if="status === 'complete'" class="html-editor-done">
-    <p class="hitl-form-sub">✅ HTML 已提交（已同步到右侧预览区）</p>
+    <p class="hitl-form-sub">✅ HTML 已提交</p>
     <HtmlPreviewCard :title="title" :html="html" :height="200" />
   </div>
   <div v-else class="gen-card html-preview-card html-editor-card">

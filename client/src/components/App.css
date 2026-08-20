@@ -85,131 +85,15 @@
 
 .main {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr;
   gap: 20px;
 }
 
-@media (max-width: 768px) {
-  .main {
-    grid-template-columns: 1fr;
-  }
-}
-
-.todo-panel,
 .tips-panel {
   background: #fff;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
   padding: 20px;
-}
-
-.todo-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.todo-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.todo-count {
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.todo-input-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.todo-input-row input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  outline: none;
-}
-
-.todo-input-row input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-}
-
-.todo-input-row button {
-  padding: 10px 18px;
-  background: #6366f1;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-}
-
-.todo-input-row button:hover {
-  background: #4f46e5;
-}
-
-.todo-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.todo-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.todo-item.done label span {
-  text-decoration: line-through;
-  color: #94a3b8;
-}
-
-.todo-item label {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.priority-badge {
-  font-size: 0.7rem;
-  padding: 2px 8px;
-  border-radius: 10px;
-  text-transform: uppercase;
-}
-
-.priority-low .priority-badge {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.priority-medium .priority-badge {
-  background: #fef9c3;
-  color: #854d0e;
-}
-
-.priority-high .priority-badge {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.remove-btn {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  font-size: 1.2rem;
-  padding: 0 4px;
-}
-
-.remove-btn:hover {
-  color: #ef4444;
 }
 
 .empty-hint {
@@ -267,53 +151,6 @@
   margin: 4px 0 0;
   color: #475569;
   font-size: 0.85rem;
-}
-
-.stats-card {
-  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-  border-color: #86efac;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.stats-num {
-  display: block;
-  font-size: 1.3rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-.stats-label {
-  display: block;
-  font-size: 0.7rem;
-  color: #64748b;
-  text-align: center;
-}
-
-.progress-bar {
-  height: 6px;
-  background: #d1fae5;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #10b981;
-  border-radius: 3px;
-  transition: width 0.3s;
-}
-
-.stats-rate {
-  margin: 8px 0 0;
-  font-size: 0.8rem;
-  color: #64748b;
-  text-align: center;
 }
 
 .hitl-card {
@@ -621,6 +458,12 @@
   overflow: hidden;
 }
 
+/* CopilotKit 聊天区内嵌预览 */
+[data-copilotkit] .html-preview-card {
+  max-width: 100%;
+  margin: 4px 0;
+}
+
 .html-preview-card.done {
   padding: 14px 16px;
   background: #dcfce7;
@@ -765,28 +608,4 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.preview-history-btn {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: 100%;
-  text-align: left;
-  padding: 8px 0;
-  border: none;
-  border-bottom: 1px solid #f1f5f9;
-  background: none;
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-
-.preview-history-btn.active strong,
-.preview-history-btn.active {
-  color: #6366f1;
-}
-
-.preview-history-btn time {
-  color: #94a3b8;
-  font-size: 0.75rem;
 }

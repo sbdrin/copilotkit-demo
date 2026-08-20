@@ -19,7 +19,7 @@ const props = withDefaults(
 const doc = computed(() => wrapHtmlDocument(props.html, props.title))
 const sandbox = computed(() =>
   props.allowScripts
-    ? "allow-scripts allow-popups allow-forms"
+    ? "allow-scripts allow-popups allow-forms allow-modals"
     : "allow-popups allow-forms",
 )
 </script>
