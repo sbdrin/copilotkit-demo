@@ -49,15 +49,8 @@ function cancel() {
 </script>
 
 <template>
-  <HitlFormShell
-    title="🛩 操作员登记"
-    subtitle="请填写无人机操作员登记信息，提交后 Agent 会继续处理"
-    :status="status"
-    done-message="操作员登记信息已提交"
-    submit-label="提交登记"
-    @submit="submit"
-    @cancel="cancel"
-  >
+  <HitlFormShell title="🛩 操作员登记" subtitle="请填写无人机操作员登记信息，提交后 Agent 会继续处理" :status="status" done-message="操作员登记信息已提交"
+    submit-label="提交登记" @submit="submit" @cancel="cancel">
     <label>
       姓名
       <input v-model="name" placeholder="张三" required />
