@@ -180,6 +180,19 @@ export function createAgnoFetch(
     const ct = res.headers.get("content-type") || ""
     console.log("[agno-proxy] ← agno", res.status, ct)
 
+    // 上游 4xx/5xx（含 503）统一转成 SSE RUN_ERROR，避免 HttpAgent 抛未捕获异常
+    if (!res.ok) {
+      const text = await res.text().catch(() => "")
+      const message = parseAgnoError(text, res.status)
+      console.error(
+        "[agno-proxy] HTTP 错误:",
+        res.status,
+        message,
+        text.slice(0, 200),
+      )
+      return agnoErrorResponse(message, `AGNO_HTTP_${res.status}`, runMeta)
+    }
+
     if (!ct.includes("text/event-stream")) {
       const text = await res.text()
       const message = parseAgnoError(text, res.status)

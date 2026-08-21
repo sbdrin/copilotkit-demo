@@ -19,6 +19,15 @@ dotenv.config()
 
 const PORT = Number(process.env.PORT) || 3001
 
+// 上游 AG-UI 异常时不应拖垮 Node 进程（如 503 触发的未处理 Promise）
+process.on("unhandledRejection", (reason) => {
+  console.error("[server] 未处理的 Promise 拒绝:", reason)
+})
+
+process.on("uncaughtException", (err) => {
+  console.error("[server] 未捕获异常:", err)
+})
+
 // 后端模式：deepseek = 直连 DeepSeek 代理；ag-ui = 转发到远程 AG-UI 端点
 type BackendMode = "deepseek" | "ag-ui"
 const backendMode: BackendMode =
